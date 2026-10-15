@@ -20,13 +20,14 @@ public class ConfigReader {
         }
     }
 
-    // Direct helper methods
-    public static String getStandardUsername() {
-        return properties.getProperty("standard.username");
+    // Single shared password for all SauceDemo test accounts
+    public static String getPassword() {
+        return properties.getProperty("app.password");
     }
 
-    public static String getStandardPassword() {
-        return properties.getProperty("standard.password");
+    // Usernames
+    public static String getStandardUsername() {
+        return properties.getProperty("standard.username");
     }
 
     public static String getLockedUsername() {
@@ -41,7 +42,7 @@ public class ConfigReader {
         return properties.getProperty("performance.username");
     }
 
-    // Generic fallback for any other property key
+    // Generic fallback for custom property keys
     public static String getProperty(String key) {
         return properties.getProperty(key);
     }
