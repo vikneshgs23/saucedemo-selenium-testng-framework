@@ -11,6 +11,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseTest {
 
@@ -36,6 +38,10 @@ public class BaseTest {
 
             case "edge":
                 EdgeOptions edgeOptions = new EdgeOptions();
+                // Suppress the password manager / data-breach popup
+                edgeOptions.setExperimentalOption("prefs", getPasswordManagerPrefs());
+                edgeOptions.addArguments("--disable-features=PasswordLeakDetection");
+                edgeOptions.addArguments("--incognito");
                 if (isHeadless) {
                     edgeOptions.addArguments("--headless=new");
                     edgeOptions.addArguments("--window-size=1920,1080");
@@ -49,6 +55,10 @@ public class BaseTest {
             case "chrome":
             default:
                 ChromeOptions chromeOptions = new ChromeOptions();
+                // Suppress the password manager / data-breach popup
+                chromeOptions.setExperimentalOption("prefs", getPasswordManagerPrefs());
+                chromeOptions.addArguments("--disable-features=PasswordLeakDetection");
+                chromeOptions.addArguments("--incognito");
                 if (isHeadless) {
                     chromeOptions.addArguments("--headless=new");
                     chromeOptions.addArguments("--window-size=1920,1080");
@@ -66,6 +76,15 @@ public class BaseTest {
 
         // Navigate to the target application
         driver.get(BASE_URL);
+    }
+
+    // Disables Chrome/Edge password manager, credential saving and leak detection
+    private Map<String, Object> getPasswordManagerPrefs() {
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.password_manager_leak_detection", false);
+        return prefs;
     }
 
     @AfterMethod(alwaysRun = true)

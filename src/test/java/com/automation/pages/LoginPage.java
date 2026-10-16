@@ -35,8 +35,11 @@ public class LoginPage {
     public void clickLoginButton() {
         waitUtils.waitForClickable(loginButton).click();
     }
-    public void login(String username, String password) {
-        enterUsername(username).enterPassword(password).clickLoginButton();
+    public InventoryPage login(String username, String password) {
+        enterUsername(username);
+        enterPassword(password);
+        clickLoginButton();
+        return new InventoryPage(driver);
     }
     public String getErrorMessage() {
       return waitUtils.waitForVisibility(errorMessage).getText().trim();
