@@ -33,6 +33,13 @@ public class InventoryPage {
         return driver.findElements(itemCards).size();
     }
 
+    // Dynamic helper to add any item by name (e.g. "Sauce Labs Backpack" -> "add-to-cart-sauce-labs-backpack")
+    public InventoryPage addItemToCart(String itemName) {
+        By buttonLocator = By.id("add-to-cart-" + itemName.toLowerCase().replace(" ", "-"));
+        waitUtils.waitForClickable(buttonLocator).click();
+        return this;
+    }
+
     public InventoryPage addBackpackToCart() {
         waitUtils.waitForClickable(addBackpackButton).click();
         return this;
@@ -47,7 +54,6 @@ public class InventoryPage {
         return waitUtils.waitForVisibility(cartBadge).getText().trim();
     }
 
-    // The badge is absent from the DOM when the cart is empty, so a missing element means false
     public boolean isCartBadgeDisplayed() {
         try {
             return driver.findElement(cartBadge).isDisplayed();
@@ -56,7 +62,9 @@ public class InventoryPage {
         }
     }
 
-    public void clickCart() {
+    // Transitions directly to CartPage
+    public CartPage clickCart() {
         waitUtils.waitForClickable(cartLink).click();
+        return new CartPage(driver);
     }
 }
