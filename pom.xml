@@ -16,6 +16,11 @@
         <selenium.version>4.25.0</selenium.version>
         <testng.version>7.10.2</testng.version>
         <surefire.version>3.2.5</surefire.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+
     </properties>
 
     <dependencies>
@@ -59,10 +64,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
+                <version>3.2.5</version>
                 <configuration>
+                    <!-- If -Dtest is passed (e.g. from clicking green play arrow), it runs that test.
+                         Otherwise, it falls back to running the full testng.xml suite -->
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
             </plugin>
