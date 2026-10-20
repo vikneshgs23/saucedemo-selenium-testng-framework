@@ -40,8 +40,9 @@ public class CartPage {
         waitUtils.waitForClickable(removeButtonFor(itemName)).click();
     }
 
-    public void clickCheckout() {
+    public CheckoutStepOnePage clickCheckout() {
         waitUtils.waitForClickable(checkoutButton).click();
+        return new CheckoutStepOnePage(driver);
     }
 
     public void clickContinueShopping() {
