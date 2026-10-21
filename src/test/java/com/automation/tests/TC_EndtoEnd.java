@@ -6,10 +6,11 @@ import com.automation.utils.ConfigReader;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class TC_E2E_001_PurchaseFlowTest extends BaseTest {
+public class TC_EndtoEnd extends BaseTest {
 
     private static final String BACKPACK = "Sauce Labs Backpack";
     private static final String BIKE_LIGHT = "Sauce Labs Bike Light";
+    private static final String BOLT_TSHIRT = "Sauce Labs Bolt T-Shirt";
 
     // Item prices on SauceDemo: Backpack = $29.99, Bike Light = $9.99
     private static final double EXPECTED_SUBTOTAL = 39.98;
@@ -66,5 +67,50 @@ public class TC_E2E_001_PurchaseFlowTest extends BaseTest {
         stepTwoPage.clickFinish();
         Assert.assertEquals(stepTwoPage.getOrderCompleteMessage(), "Thank you for your order!",
                 "Order completion confirmation text mismatch");
+    }
+    @Test(
+            testName = "TC_E2E_002",
+            description = "TC_E2E_002 - Verify adding three items, removing one from cart, badge count update, and inventory button state reflection"
+    )
+    public void TC_E2E_002_verifyCartModificationAndStateSync() {
+        // 1. Log in with valid credentials
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+
+        // 2. Add three items to the cart from the inventory page
+        inventoryPage.addItemToCart(BACKPACK)
+                .addItemToCart(BIKE_LIGHT)
+                .addItemToCart(BOLT_TSHIRT);
+
+        // 3. Verify cart badge displays '3'
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "3",
+                "Cart badge count should display '3' after adding three items");
+
+        // 4. Click the cart icon to view cart
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+        Assert.assertEquals(cartPage.getCartItemCount(), 3, "Cart should contain 3 items");
+
+        // 5. Click 'Remove' on one item
+        cartPage.removeItem(BIKE_LIGHT);
+
+        // 6. Verify cart badge updates to '2'
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "2",
+                "Cart badge should display '2' after removing one item");
+        Assert.assertFalse(cartPage.isItemInCart(BIKE_LIGHT),
+                BIKE_LIGHT + " should no longer appear in the cart list");
+
+        // 7. Click 'Continue Shopping'
+        cartPage.clickContinueShopping();
+        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
+                "User should be navigated back to the Inventory page");
+
+        // 8. Verify the removed item shows 'Add to cart' on the inventory page
+        Assert.assertTrue(inventoryPage.isAddToCartButtonDisplayed(BIKE_LIGHT),
+                "Removed item '" + BIKE_LIGHT + "' should toggle back to 'Add to cart' button");
     }
 }
