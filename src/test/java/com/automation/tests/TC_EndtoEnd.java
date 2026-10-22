@@ -113,4 +113,51 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(inventoryPage.isAddToCartButtonDisplayed(BIKE_LIGHT),
                 "Removed item '" + BIKE_LIGHT + "' should toggle back to 'Add to cart' button");
     }
+
+    @Test(
+            testName = "TC_E2E_003",
+            description = "TC_E2E_003 - Verify catalog sorting by price ascending, price descending, and alphabetical descending"
+    )
+    public void TC_E2E_003_verifyProductSortingFilters() {
+        // Step 1: Log in with valid credentials
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to navigate to Inventory page");
+
+        // Step 2: Select sort filter 'Price (low to high)'
+        inventoryPage.selectSortOption("Price (low to high)");
+
+        // Step 3: Verify inventory list sorts prices in ascending order
+        java.util.List<Double> lowToHighPrices = inventoryPage.getAllItemPrices();
+        java.util.List<Double> sortedLowToHigh = new java.util.ArrayList<>(lowToHighPrices);
+        java.util.Collections.sort(sortedLowToHigh);
+
+        Assert.assertEquals(lowToHighPrices, sortedLowToHigh,
+                "Prices are not sorted in ascending order (low to high)");
+
+        // Step 4: Select sort filter 'Price (high to low)'
+        inventoryPage.selectSortOption("Price (high to low)");
+
+        // Step 5: Verify inventory list sorts prices in descending order
+        java.util.List<Double> highToLowPrices = inventoryPage.getAllItemPrices();
+        java.util.List<Double> sortedHighToLow = new java.util.ArrayList<>(highToLowPrices);
+        sortedHighToLow.sort(java.util.Collections.reverseOrder());
+
+        Assert.assertEquals(highToLowPrices, sortedHighToLow,
+                "Prices are not sorted in descending order (high to low)");
+
+        // Step 6: Select sort filter 'Name (Z to A)'
+        inventoryPage.selectSortOption("Name (Z to A)");
+
+        // Step 7: Verify product names sort alphabetically descending
+        java.util.List<String> namesZtoA = inventoryPage.getAllItemNames();
+        java.util.List<String> sortedNamesZtoA = new java.util.ArrayList<>(namesZtoA);
+        sortedNamesZtoA.sort(java.util.Collections.reverseOrder());
+
+        Assert.assertEquals(namesZtoA, sortedNamesZtoA,
+                "Product titles are not sorted in reverse alphabetical order (Z to A)");
+    }
 }

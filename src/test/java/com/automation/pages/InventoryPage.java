@@ -1,10 +1,11 @@
 package com.automation.pages;
 
 import com.automation.utils.WaitUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.Select;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class InventoryPage {
 
@@ -18,6 +19,9 @@ public class InventoryPage {
     private final By removeBackpackButton = By.id("remove-sauce-labs-backpack");
     private final By cartBadge = By.className("shopping_cart_badge");
     private final By cartLink = By.className("shopping_cart_link");
+    private final By sortDropdown = By.className("product_sort_container");
+    private final By itemPrices = By.className("inventory_item_price");
+    private final By itemTitles = By.className("inventory_item_name");
 
     public InventoryPage(WebDriver driver) {
         this.driver = driver;
@@ -70,5 +74,25 @@ public class InventoryPage {
     public boolean isAddToCartButtonDisplayed(String itemName) {
         By buttonLocator = By.id("add-to-cart-" + itemName.toLowerCase().replace(" ", "-"));
         return driver.findElement(buttonLocator).isDisplayed();
+    }
+    public InventoryPage selectSortOption(String visibleText) {
+        WebElement dropdownElement = waitUtils.waitForVisibility(sortDropdown);
+        Select select = new Select(dropdownElement);
+        select.selectByVisibleText(visibleText);
+        return this;
+    }
+
+    public List<Double> getAllItemPrices() {
+        return driver.findElements(itemPrices)
+                .stream()
+                .map(element -> Double.parseDouble(element.getText().replace("$", "").trim()))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getAllItemNames() {
+        return driver.findElements(itemTitles)
+                .stream()
+                .map(element -> element.getText().trim())
+                .collect(Collectors.toList());
     }
 }
