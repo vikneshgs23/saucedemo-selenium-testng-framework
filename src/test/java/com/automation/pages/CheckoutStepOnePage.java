@@ -1,10 +1,7 @@
 package com.automation.pages;
 
 import com.automation.utils.WaitUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
 public class CheckoutStepOnePage {
 
@@ -18,6 +15,7 @@ public class CheckoutStepOnePage {
     private final By continueButton = By.id("continue");
     private final By cancelButton = By.id("cancel");
     private final By errorMessage = By.cssSelector("[data-test='error']");
+    private final By errorCloseButton = By.cssSelector(".error-button");
 
     public CheckoutStepOnePage(WebDriver driver) {
         this.driver = driver;
@@ -25,20 +23,23 @@ public class CheckoutStepOnePage {
     }
 
     public CheckoutStepOnePage enterFirstName(String firstName) {
-        waitUtils.waitForVisibility(firstNameInput).clear();
-        driver.findElement(firstNameInput).sendKeys(firstName);
+        WebElement element = waitUtils.waitForVisibility(firstNameInput);
+        element.clear();
+        element.sendKeys(firstName);
         return this;
     }
 
     public CheckoutStepOnePage enterLastName(String lastName) {
-        waitUtils.waitForVisibility(lastNameInput).clear();
-        driver.findElement(lastNameInput).sendKeys(lastName);
+        WebElement element = waitUtils.waitForVisibility(lastNameInput);
+        element.clear();
+        element.sendKeys(lastName);
         return this;
     }
 
     public CheckoutStepOnePage enterPostalCode(String postalCode) {
-        waitUtils.waitForVisibility(postalCodeInput).clear();
-        driver.findElement(postalCodeInput).sendKeys(postalCode);
+        WebElement element = waitUtils.waitForVisibility(postalCodeInput);
+        element.clear();
+        element.sendKeys(postalCode);
         return this;
     }
 
@@ -69,5 +70,30 @@ public class CheckoutStepOnePage {
         } catch (NoSuchElementException | TimeoutException e) {
             return false;
         }
+    }
+    public CheckoutStepOnePage clearFirstName() {
+        WebElement element = waitUtils.waitForVisibility(firstNameInput);
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        return this;
+    }
+
+    public CheckoutStepOnePage clearLastName() {
+        WebElement element = waitUtils.waitForVisibility(lastNameInput);
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        return this;
+    }
+
+    public CheckoutStepOnePage clearPostalCode() {
+        WebElement element = waitUtils.waitForVisibility(postalCodeInput);
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        return this;
+    }
+    public CheckoutStepOnePage dismissErrorMessageIfPresent() {
+        try {
+            driver.findElement(errorCloseButton).click();
+        } catch (Exception ignored) {
+            // No banner was present
+        }
+        return this;
     }
 }

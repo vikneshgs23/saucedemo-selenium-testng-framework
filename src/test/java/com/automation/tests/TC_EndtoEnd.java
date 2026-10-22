@@ -160,4 +160,53 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertEquals(namesZtoA, sortedNamesZtoA,
                 "Product titles are not sorted in reverse alphabetical order (Z to A)");
     }
+    @Test(
+            testName = "TC_E2E_004",
+            description = "TC_E2E_004 - Verify checkout step one field-level validation errors for missing first name, last name, and postal code"
+    )
+    public void TC_E2E_004_verifyCheckoutFieldValidations() {
+        // Step 1: Log in and add an item to the cart
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+        inventoryPage.addItemToCart(BACKPACK);
+
+        // Step 2: Navigate to cart and click 'Checkout'
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+
+// Step 3: Leave First Name empty, fill other fields, click 'Continue'
+        stepOnePage.clearFirstName()
+                .enterLastName("Doe")
+                .enterPostalCode("600001");
+        stepOnePage.clickContinue();
+
+        Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty first name");
+        Assert.assertTrue(stepOnePage.getErrorMessage().contains("First Name is required"));
+
+        // Step 4: Fill First Name, leave Last Name empty, click 'Continue'
+        stepOnePage.dismissErrorMessageIfPresent()
+                .enterFirstName("John")
+                .clearLastName()
+                .enterPostalCode("600001");
+        stepOnePage.clickContinue();
+
+        Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty last name");
+        Assert.assertTrue(stepOnePage.getErrorMessage().contains("Last Name is required"));
+
+        // Step 5: Fill Last Name, leave Postal Code empty, click 'Continue'
+        stepOnePage.dismissErrorMessageIfPresent()
+                .enterFirstName("John")
+                .enterLastName("Doe")
+                .clearPostalCode();
+        stepOnePage.clickContinue();
+
+        Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty postal code");
+        Assert.assertTrue(stepOnePage.getErrorMessage().contains("Postal Code is required"));
+    }
 }
