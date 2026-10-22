@@ -1,6 +1,7 @@
 package com.automation.utils;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -52,7 +53,19 @@ public class WaitUtils {
     /**
      * Waits for the current URL to contain a given partial string.
      */
-    public boolean waitForUrlContains(String partialUrl) {
-        return wait.until(ExpectedConditions.urlContains(partialUrl));
+    public void waitForUrlContains(String partialUrl) {
+        wait.until(ExpectedConditions.urlContains(partialUrl));
+    }
+    public boolean waitForTextToBePresent(By locator, String text) {
+        return wait.until(ExpectedConditions.textToBePresentInElementLocated(locator, text));
+    }
+
+    // 3. Stale-safe element text retrieval
+    public String getText(By locator) {
+        return wait.ignoring(StaleElementReferenceException.class)
+                .until(d -> {
+                    String text = d.findElement(locator).getText().trim();
+                    return !text.isEmpty() ? text : null;
+                });
     }
 }

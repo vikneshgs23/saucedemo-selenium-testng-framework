@@ -10,6 +10,7 @@ public class CheckoutStepOnePage {
 
     // Locators
     private final By firstNameInput = By.id("first-name");
+    private final By pageTitle = By.className("title");
     private final By lastNameInput = By.id("last-name");
     private final By postalCodeInput = By.id("postal-code");
     private final By continueButton = By.id("continue");
@@ -95,5 +96,9 @@ public class CheckoutStepOnePage {
             // No banner was present
         }
         return this;
+    }
+    public String getPageTitle() {
+        waitUtils.waitForUrlContains("checkout-step-one.html");
+        return waitUtils.getText(pageTitle);
     }
 }

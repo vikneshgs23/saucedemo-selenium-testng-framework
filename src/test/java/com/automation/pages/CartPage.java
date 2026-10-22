@@ -24,7 +24,8 @@ public class CartPage {
     }
 
     public String getPageTitle() {
-        return waitUtils.waitForVisibility(pageTitle).getText().trim();
+        waitUtils.waitForUrlContains("cart.html");
+        return waitUtils.getText(pageTitle);
     }
 
     public int getCartItemCount() {

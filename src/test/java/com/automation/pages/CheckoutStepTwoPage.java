@@ -24,7 +24,8 @@ public class CheckoutStepTwoPage {
     }
 
     public String getPageTitle() {
-        return waitUtils.waitForVisibility(pageTitle).getText().trim();
+        waitUtils.waitForUrlContains("checkout-step-two.html");
+        return waitUtils.getText(pageTitle);
     }
 
     public String getItemTotalText() {
