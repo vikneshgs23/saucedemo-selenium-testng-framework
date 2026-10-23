@@ -54,5 +54,12 @@ public class LoginPage {
         }
 
     }
+    public boolean isAtLoginPage() {
+        try {
+            return waitUtils.waitForVisibility(loginButton).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }

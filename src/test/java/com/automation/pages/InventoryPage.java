@@ -23,6 +23,8 @@ public class InventoryPage {
     private final By itemPrices = By.className("inventory_item_price");
     private final By itemTitles = By.className("inventory_item_name");
     private final By itemImages = By.cssSelector(".inventory_item_img img");
+    private final By menuButton = By.id("react-burger-menu-btn");
+    private final By logoutLink = By.id("logout_sidebar_link");
 
     public InventoryPage(WebDriver driver) {
         this.driver = driver;
@@ -104,5 +106,15 @@ public class InventoryPage {
         waitUtils.waitForVisibility(itemImages);
         List<WebElement> images = driver.findElements(itemImages);
         return images.stream().allMatch(img -> img.getAttribute("src").contains("sl-404"));
+    }
+    public InventoryPage openMenu() {
+        waitUtils.waitForClickable(menuButton).click();
+        return this;
+    }
+
+    public LoginPage clickLogout() {
+        waitUtils.waitForClickable(logoutLink).click();
+        waitUtils.waitForUrlContains("saucedemo.com");
+        return new LoginPage(driver);
     }
 }

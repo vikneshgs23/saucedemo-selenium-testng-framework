@@ -304,4 +304,48 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(driver.getCurrentUrl().contains("checkout-step-one.html"),
                 "User should remain on checkout-step-one page due to validation halt");
     }
+    @Test(
+            testName = "TC_E2E_007",
+            description = "TC_E2E_007 - Verify session termination on logout, browser back-button denial, and direct URL routing security"
+    )
+    public void TC_E2E_007_verifyLogoutAndUnauthorizedRouteAccess() {
+        // Step 1: Log in, add two items to the cart
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+
+        inventoryPage.addItemToCart(BACKPACK)
+                .addItemToCart(BIKE_LIGHT);
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "2", "Cart badge count mismatch");
+
+        // Step 2 & 3: Open the burger menu sidebar and click 'Logout'
+        loginPage = inventoryPage.openMenu()
+                .clickLogout();
+
+        // Step 4: Verify user is on the login page
+        Assert.assertTrue(loginPage.isAtLoginPage(), "User was not redirected to the login page after logout");
+        Assert.assertFalse(driver.getCurrentUrl().contains("inventory.html"),
+                "URL should not point to inventory after logout");
+
+        // Step 5: Click the browser's Back button
+        driver.navigate().back();
+
+        // Verify session protection kicks in: user remains barred from catalog
+        Assert.assertTrue(loginPage.isAtLoginPage(),
+                "Browser back button allowed unauthorized access into inventory");
+        Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/inventory.html' when you are logged in."),
+                "Expected access restriction error after pressing back");
+
+        // Step 6: Attempt to access https://www.saucedemo.com/inventory.html directly via the URL bar
+        driver.get("https://www.saucedemo.com/inventory.html");
+
+        // Verify direct route access redirects back to login with active restriction banner
+        Assert.assertTrue(loginPage.isAtLoginPage(),
+                "Direct deep-linking to /inventory.html allowed unauthorized access");
+        Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/inventory.html' when you are logged in."),
+                "Expected route authorization error banner when deep-linking without active session");
+    }
 }
