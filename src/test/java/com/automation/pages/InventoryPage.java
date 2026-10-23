@@ -74,7 +74,11 @@ public class InventoryPage {
     }
     public boolean isAddToCartButtonDisplayed(String itemName) {
         By buttonLocator = By.id("add-to-cart-" + itemName.toLowerCase().replace(" ", "-"));
-        return driver.findElement(buttonLocator).isDisplayed();
+        try {
+            return waitUtils.waitForVisibility(buttonLocator).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     public InventoryPage selectSortOption(String visibleText) {
         WebElement dropdownElement = waitUtils.waitForVisibility(sortDropdown);

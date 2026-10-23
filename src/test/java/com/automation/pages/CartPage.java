@@ -46,8 +46,10 @@ public class CartPage {
         return new CheckoutStepOnePage(driver);
     }
 
-    public void clickContinueShopping() {
+    public InventoryPage clickContinueShopping() {
         waitUtils.waitForClickable(continueShoppingButton).click();
+        waitUtils.waitForUrlContains("inventory.html");
+        return new InventoryPage(driver);
     }
 
     /** Builds the remove button locator, e.g. "Sauce Labs Backpack" -> remove-sauce-labs-backpack. */

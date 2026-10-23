@@ -104,12 +104,10 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertFalse(cartPage.isItemInCart(BIKE_LIGHT),
                 BIKE_LIGHT + " should no longer appear in the cart list");
 
-        // 7. Click 'Continue Shopping'
-        cartPage.clickContinueShopping();
-        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
-                "User should be navigated back to the Inventory page");
+        // Step 7: Click 'Continue Shopping'
+        inventoryPage = cartPage.clickContinueShopping();
 
-        // 8. Verify the removed item shows 'Add to cart' on the inventory page
+// Step 8: Verify the removed item shows 'Add to cart' on the inventory page
         Assert.assertTrue(inventoryPage.isAddToCartButtonDisplayed(BIKE_LIGHT),
                 "Removed item '" + BIKE_LIGHT + "' should toggle back to 'Add to cart' button");
     }
