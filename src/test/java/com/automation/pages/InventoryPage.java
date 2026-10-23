@@ -22,6 +22,7 @@ public class InventoryPage {
     private final By sortDropdown = By.className("product_sort_container");
     private final By itemPrices = By.className("inventory_item_price");
     private final By itemTitles = By.className("inventory_item_name");
+    private final By itemImages = By.cssSelector(".inventory_item_img img");
 
     public InventoryPage(WebDriver driver) {
         this.driver = driver;
@@ -94,5 +95,10 @@ public class InventoryPage {
                 .stream()
                 .map(element -> element.getText().trim())
                 .collect(Collectors.toList());
+    }
+    public boolean areAllItemImagesUsingFallback() {
+        waitUtils.waitForVisibility(itemImages);
+        List<WebElement> images = driver.findElements(itemImages);
+        return images.stream().allMatch(img -> img.getAttribute("src").contains("sl-404"));
     }
 }

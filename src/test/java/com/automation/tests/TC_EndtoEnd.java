@@ -265,4 +265,45 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1",
                 "Item should remain preserved in cart badge after overview cancellation");
     }
+    @Test(
+            testName = "TC_E2E_006",
+            description = "TC_E2E_006 - Verify problem_user defect behavior: broken product images and unfillable Last Name field triggering validation error"
+    )
+    public void TC_E2E_006_verifyProblemUserKnownDefects() {
+        // 1. Log in with problem_user
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login("problem_user", ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+
+        // 2. Inspect product images on the catalog (known bug: all images show fallback 404 dog photo)
+        Assert.assertTrue(inventoryPage.areAllItemImagesUsingFallback(),
+                "Expected all product images to render fallback asset for problem_user");
+
+        // 3. Add 'Sauce Labs Backpack' to the cart
+        inventoryPage.addItemToCart("Sauce Labs Backpack");
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1", "Cart badge count mismatch");
+
+        // 4. Navigate to checkout and attempt to fill 'Last Name'
+        CartPage cartPage = inventoryPage.clickCart();
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+
+        stepOnePage.enterFirstName("John")
+                .enterLastName("Doe")
+                .enterPostalCode("600001");
+
+        // 5. Click 'Continue' and handle the known defect:
+        // On problem_user, the Last Name field cannot be updated, causing the page to fail validation
+        stepOnePage.clickContinue();
+
+        // Validate that the system rejects the submission with the Last Name error
+        Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(),
+                "Error banner should be visible due to unfillable Last Name field");
+        Assert.assertTrue(stepOnePage.getErrorMessage().contains("Last Name is required"),
+                "Expected 'Error: Last Name is required' banner due to problem_user field defect");
+
+        // Confirm the URL remains on step one rather than advancing to overview
+        Assert.assertTrue(driver.getCurrentUrl().contains("checkout-step-one.html"),
+                "User should remain on checkout-step-one page due to validation halt");
+    }
 }
