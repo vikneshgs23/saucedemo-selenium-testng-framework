@@ -209,4 +209,60 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty postal code");
         Assert.assertTrue(stepOnePage.getErrorMessage().contains("Postal Code is required"));
     }
+    @Test(
+            testName = "TC_E2E_005",
+            description = "TC_E2E_005 - Verify cancellation flows from Checkout Step One (returns to Cart with item preserved) and Checkout Step Two (returns to Inventory)"
+    )
+    public void TC_E2E_005_verifyCheckoutCancellationFlows() {
+        final String FLEECE_JACKET = "Sauce Labs Fleece Jacket";
+
+        // Step 1: Log in and add 'Sauce Labs Fleece Jacket' to the cart
+        LoginPage loginPage = new LoginPage(driver);
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+        inventoryPage.addItemToCart(FLEECE_JACKET);
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1", "Cart badge count mismatch");
+
+        // Step 2: Navigate to Cart and click 'Checkout'
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+        Assert.assertTrue(cartPage.isItemInCart(FLEECE_JACKET), FLEECE_JACKET + " should be in the cart");
+
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+        Assert.assertEquals(stepOnePage.getPageTitle(), "Checkout: Your Information",
+                "Failed to reach Checkout Step One");
+
+        // Step 3: Click 'Cancel' on the 'Checkout: Your Information' page
+        cartPage = stepOnePage.clickCancel();
+
+        // Step 4: Verify navigation returns to 'Your Cart' with the item preserved
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart",
+                "Canceling step one should return user to Cart page");
+        Assert.assertEquals(cartPage.getCartItemCount(), 1,
+                "Cart count should remain 1 after cancellation");
+        Assert.assertTrue(cartPage.isItemInCart(FLEECE_JACKET),
+                FLEECE_JACKET + " should still be present in the cart");
+
+        // Step 5: Click 'Checkout', fill required details, and click 'Continue'
+        stepOnePage = cartPage.clickCheckout();
+        stepOnePage.fillCustomerInformation("G S", "Viknesh", "600001");
+
+        CheckoutStepTwoPage stepTwoPage = stepOnePage.clickContinue();
+        Assert.assertEquals(stepTwoPage.getPageTitle(), "Checkout: Overview",
+                "Failed to reach Checkout Overview page");
+
+        // Step 6: On 'Checkout: Overview', click 'Cancel'
+        inventoryPage = stepTwoPage.clickCancel();
+
+        // Verify cancellation from overview redirects back to the inventory catalog
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products",
+                "Canceling step two overview should return user to Inventory page");
+        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
+                "URL should contain inventory.html");
+        Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1",
+                "Item should remain preserved in cart badge after overview cancellation");
+    }
 }
