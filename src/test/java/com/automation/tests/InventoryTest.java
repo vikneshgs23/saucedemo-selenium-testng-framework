@@ -16,10 +16,10 @@ public class InventoryTest extends BaseTest {
     // so the browser is already open on the login page.
     @BeforeMethod(alwaysRun = true)
     public void loginAndOpenInventory() {
-        new LoginPage(driver).login(
+        new LoginPage(getDriver()).login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
-        inventoryPage = new InventoryPage(driver);
+        inventoryPage = new InventoryPage(getDriver());
     }
 
     @Test(description = "Verify inventory page loads with title and 6 products")

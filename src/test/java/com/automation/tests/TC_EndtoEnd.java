@@ -21,7 +21,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_001_verifySuccessfulMultiItemOrder() {
         // Step 1: Log in with valid credentials
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -74,7 +74,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_002_verifyCartModificationAndStateSync() {
         // 1. Log in with valid credentials
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -118,7 +118,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_003_verifyProductSortingFilters() {
         // Step 1: Log in with valid credentials
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -164,7 +164,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_004_verifyCheckoutFieldValidations() {
         // Step 1: Log in and add an item to the cart
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -215,7 +215,7 @@ public class TC_EndtoEnd extends BaseTest {
         final String FLEECE_JACKET = "Sauce Labs Fleece Jacket";
 
         // Step 1: Log in and add 'Sauce Labs Fleece Jacket' to the cart
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -258,7 +258,7 @@ public class TC_EndtoEnd extends BaseTest {
         // Verify cancellation from overview redirects back to the inventory catalog
         Assert.assertEquals(inventoryPage.getPageTitle(), "Products",
                 "Canceling step two overview should return user to Inventory page");
-        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("inventory.html"),
                 "URL should contain inventory.html");
         Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1",
                 "Item should remain preserved in cart badge after overview cancellation");
@@ -269,7 +269,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_006_verifyProblemUserKnownDefects() {
         // 1. Log in with problem_user
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login("problem_user", ConfigReader.getPassword());
 
         Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
@@ -301,7 +301,7 @@ public class TC_EndtoEnd extends BaseTest {
                 "Expected 'Error: Last Name is required' banner due to problem_user field defect");
 
         // Confirm the URL remains on step one rather than advancing to overview
-        Assert.assertTrue(driver.getCurrentUrl().contains("checkout-step-one.html"),
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-one.html"),
                 "User should remain on checkout-step-one page due to validation halt");
     }
     @Test(
@@ -310,7 +310,7 @@ public class TC_EndtoEnd extends BaseTest {
     )
     public void TC_E2E_007_verifyLogoutAndUnauthorizedRouteAccess() {
         // Step 1: Log in, add two items to the cart
-        LoginPage loginPage = new LoginPage(driver);
+        LoginPage loginPage = new LoginPage(getDriver());
         InventoryPage inventoryPage = loginPage.login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
@@ -327,11 +327,11 @@ public class TC_EndtoEnd extends BaseTest {
 
         // Step 4: Verify user is on the login page
         Assert.assertTrue(loginPage.isAtLoginPage(), "User was not redirected to the login page after logout");
-        Assert.assertFalse(driver.getCurrentUrl().contains("inventory.html"),
+        Assert.assertFalse(getDriver().getCurrentUrl().contains("inventory.html"),
                 "URL should not point to inventory after logout");
 
         // Step 5: Click the browser's Back button
-        driver.navigate().back();
+        getDriver().navigate().back();
 
         // Verify session protection kicks in: user remains barred from catalog
         Assert.assertTrue(loginPage.isAtLoginPage(),
@@ -340,7 +340,7 @@ public class TC_EndtoEnd extends BaseTest {
                 "Expected access restriction error after pressing back");
 
         // Step 6: Attempt to access https://www.saucedemo.com/inventory.html directly via the URL bar
-        driver.get("https://www.saucedemo.com/inventory.html");
+        getDriver().get("https://www.saucedemo.com/inventory.html");
 
         // Verify direct route access redirects back to login with active restriction banner
         Assert.assertTrue(loginPage.isAtLoginPage(),

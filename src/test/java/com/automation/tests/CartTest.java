@@ -17,10 +17,10 @@ public class CartTest extends BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void loginBeforeEachTest() {
-        new LoginPage(driver).login(
+        new LoginPage(getDriver()).login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
-        inventoryPage = new InventoryPage(driver);
+        inventoryPage = new InventoryPage(getDriver());
     }
 
     @Test(description = "Item added from the inventory page appears in the cart")
@@ -51,7 +51,7 @@ public class CartTest extends BaseTest {
 
         cartPage.clickContinueShopping();
 
-        Assert.assertTrue(driver.getCurrentUrl().contains("inventory.html"),
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("inventory.html"),
                 "Expected to be redirected back to the inventory page");
     }
 }

@@ -10,13 +10,9 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import java.lang.reflect.Field;
-
 public class TestListener implements ITestListener {
 
     private static final ExtentReports extent = ExtentReportManager.getInstance();
-    // ThreadLocal ensures parallel test runs do not overwrite each other's report logs
-    private static final ThreadLocal<ExtentTest> testNode = new ThreadLocal<>();
 
     @Override
     public void onStart(ITestContext context) {
@@ -28,53 +24,55 @@ public class TestListener implements ITestListener {
         String testName = result.getMethod().getMethodName();
         System.out.println(">>> Starting Test: " + testName);
         ExtentTest test = extent.createTest(testName, result.getMethod().getDescription());
-        testNode.set(test);
+        ExtentReportManager.setTest(test);
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
         System.out.println("PASSED: " + result.getMethod().getMethodName());
-        testNode.get().log(Status.PASS, "Test executed successfully.");
+        if (ExtentReportManager.getTest() != null) {
+            ExtentReportManager.getTest().log(Status.PASS, "Test executed successfully.");
+        }
+        ExtentReportManager.unloadTest();
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
         String methodName = result.getMethod().getMethodName();
         System.err.println("FAILED: " + methodName);
-        testNode.get().log(Status.FAIL, result.getThrowable());
 
-        // Extract driver instance from BaseTest
-        Object currentClass = result.getInstance();
-        WebDriver driver = null;
+        if (ExtentReportManager.getTest() != null) {
+            ExtentReportManager.getTest().log(Status.FAIL, result.getThrowable());
 
-        try {
-            Field driverField = BaseTest.class.getDeclaredField("driver");
-            driverField.setAccessible(true);
-            driver = (WebDriver) driverField.get(currentClass);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            System.err.println("Could not extract driver from test class: " + e.getMessage());
-        }
+            // Retrieve thread-isolated WebDriver instance directly from BaseTest
+            WebDriver driver = BaseTest.getDriver();
 
-        if (driver != null) {
-            String screenshotPath = ScreenshotUtil.captureScreenshot(driver, methodName);
-            if (screenshotPath != null) {
-                // Attach screenshot into the Extent Report card
-                testNode.get().fail("Failure Screenshot",
-                        MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+            if (driver != null) {
+                String screenshotPath = ScreenshotUtil.captureScreenshot(driver, methodName);
+                if (screenshotPath != null) {
+                    ExtentReportManager.getTest().fail("Failure Screenshot",
+                            MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+                }
+            } else {
+                System.err.println("WebDriver was null for thread; cannot capture screenshot for " + methodName);
             }
         }
+        ExtentReportManager.unloadTest();
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
         System.out.println("SKIPPED: " + result.getMethod().getMethodName());
-        testNode.get().log(Status.SKIP, "Test skipped: " + result.getThrowable());
+        if (ExtentReportManager.getTest() != null) {
+            ExtentReportManager.getTest().log(Status.SKIP, "Test skipped: " + result.getThrowable());
+        }
+        ExtentReportManager.unloadTest();
     }
 
     @Override
     public void onFinish(ITestContext context) {
         System.out.println("=== Test Suite Execution Finished: " + context.getName() + " ===");
-        // Write the HTML report to disk
+        // Write HTML report to disk
         extent.flush();
     }
 }

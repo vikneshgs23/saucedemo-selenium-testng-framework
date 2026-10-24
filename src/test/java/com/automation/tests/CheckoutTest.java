@@ -18,7 +18,7 @@ public class CheckoutTest extends BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setupCartWithItem() {
-        InventoryPage inventoryPage = new LoginPage(driver).login(
+        InventoryPage inventoryPage = new LoginPage(getDriver()).login(
                 ConfigReader.getStandardUsername(),
                 ConfigReader.getPassword());
 

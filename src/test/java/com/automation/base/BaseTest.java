@@ -16,10 +16,22 @@ import java.util.Map;
 
 public class BaseTest {
 
-    // Protected so test classes can access the driver directly
-    protected WebDriver driver;
+    // ThreadLocal container: gives each thread its own isolated WebDriver instance
+    private static final ThreadLocal<WebDriver> driverThreadLocal = new ThreadLocal<>();
 
     protected static final String BASE_URL = "https://www.saucedemo.com/";
+
+    public static WebDriver getDriver() {
+        return driverThreadLocal.get();
+    }
+
+    public static void setDriver(WebDriver driver) {
+        driverThreadLocal.set(driver);
+    }
+
+    public static void unloadDriver() {
+        driverThreadLocal.remove();
+    }
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
@@ -27,13 +39,15 @@ public class BaseTest {
         String browser = System.getProperty("browser", "chrome").toLowerCase();
         boolean isHeadless = Boolean.parseBoolean(System.getProperty("headless", "false"));
 
+        WebDriver localDriver;
+
         switch (browser) {
             case "firefox":
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
                 if (isHeadless) {
                     firefoxOptions.addArguments("-headless");
                 }
-                driver = new FirefoxDriver(firefoxOptions);
+                localDriver = new FirefoxDriver(firefoxOptions);
                 break;
 
             case "edge":
@@ -49,7 +63,7 @@ public class BaseTest {
                     edgeOptions.addArguments("--no-sandbox");
                     edgeOptions.addArguments("--disable-dev-shm-usage");
                 }
-                driver = new EdgeDriver(edgeOptions);
+                localDriver = new EdgeDriver(edgeOptions);
                 break;
 
             case "chrome":
@@ -66,16 +80,19 @@ public class BaseTest {
                     chromeOptions.addArguments("--no-sandbox");
                     chromeOptions.addArguments("--disable-dev-shm-usage");
                 }
-                driver = new ChromeDriver(chromeOptions);
+                localDriver = new ChromeDriver(chromeOptions);
                 break;
         }
 
+        // Store the newly created driver in the current thread's ThreadLocal storage
+        setDriver(localDriver);
+
         // Window configuration and page-level timeout
-        driver.manage().window().maximize();
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(20));
+        getDriver().manage().window().maximize();
+        getDriver().manage().timeouts().pageLoadTimeout(Duration.ofSeconds(20));
 
         // Navigate to the target application
-        driver.get(BASE_URL);
+        getDriver().get(BASE_URL);
     }
 
     // Disables Chrome/Edge password manager, credential saving and leak detection
@@ -89,8 +106,9 @@ public class BaseTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown() {
-        if (driver != null) {
-            driver.quit();
+        if (getDriver() != null) {
+            getDriver().quit();
+            unloadDriver(); // Cleans up the thread to prevent memory leaks
         }
     }
 }
