@@ -25,6 +25,8 @@ public class CartPage {
 
     public String getPageTitle() {
         waitUtils.waitForUrlContains("cart.html");
+        // Explicitly wait until the title text updates to "Your Cart"
+        waitUtils.waitForText(pageTitle, "Your Cart");
         return waitUtils.getText(pageTitle);
     }
 

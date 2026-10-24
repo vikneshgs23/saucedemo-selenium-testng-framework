@@ -71,7 +71,13 @@ public class InventoryPage {
 
     // Transitions directly to CartPage
     public CartPage clickCart() {
-        waitUtils.waitForClickable(cartLink).click();
+        WebElement cartElement = waitUtils.waitForClickable(cartLink);
+        try {
+            cartElement.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", cartElement);
+        }
+        waitUtils.waitForUrlContains("cart.html");
         return new CartPage(driver);
     }
     public boolean isAddToCartButtonDisplayed(String itemName) {
