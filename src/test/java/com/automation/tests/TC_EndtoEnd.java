@@ -68,6 +68,7 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertEquals(stepTwoPage.getOrderCompleteMessage(), "Thank you for your order!",
                 "Order completion confirmation text mismatch");
     }
+
     @Test(
             testName = "TC_E2E_002",
             description = "TC_E2E_002 - Verify adding three items, removing one from cart, badge count update, and inventory button state reflection"
@@ -107,7 +108,7 @@ public class TC_EndtoEnd extends BaseTest {
         // Step 7: Click 'Continue Shopping'
         inventoryPage = cartPage.clickContinueShopping();
 
-// Step 8: Verify the removed item shows 'Add to cart' on the inventory page
+        // Step 8: Verify the removed item shows 'Add to cart' on the inventory page
         Assert.assertTrue(inventoryPage.isAddToCartButtonDisplayed(BIKE_LIGHT),
                 "Removed item '" + BIKE_LIGHT + "' should toggle back to 'Add to cart' button");
     }
@@ -158,6 +159,7 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertEquals(namesZtoA, sortedNamesZtoA,
                 "Product titles are not sorted in reverse alphabetical order (Z to A)");
     }
+
     @Test(
             testName = "TC_E2E_004",
             description = "TC_E2E_004 - Verify checkout step one field-level validation errors for missing first name, last name, and postal code"
@@ -178,12 +180,11 @@ public class TC_EndtoEnd extends BaseTest {
 
         CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
 
-// Step 3: Leave First Name empty, fill other fields, click 'Continue'
+        // Step 3: Leave First Name empty, fill other fields, click 'Continue'
         stepOnePage.clearFirstName()
                 .enterLastName("Doe")
                 .enterPostalCode("600001");
-        stepOnePage.clickContinue();
-
+        stepOnePage.clickContinueExpectingFailure();
         Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty first name");
         Assert.assertTrue(stepOnePage.getErrorMessage().contains("First Name is required"));
 
@@ -192,7 +193,7 @@ public class TC_EndtoEnd extends BaseTest {
                 .enterFirstName("John")
                 .clearLastName()
                 .enterPostalCode("600001");
-        stepOnePage.clickContinue();
+        stepOnePage.clickContinueExpectingFailure();
 
         Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty last name");
         Assert.assertTrue(stepOnePage.getErrorMessage().contains("Last Name is required"));
@@ -202,11 +203,13 @@ public class TC_EndtoEnd extends BaseTest {
                 .enterFirstName("John")
                 .enterLastName("Doe")
                 .clearPostalCode();
-        stepOnePage.clickContinue();
+        // Changed to clickContinueExpectingFailure() to prevent timeout on step two transition
+        stepOnePage.clickContinueExpectingFailure();
 
         Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(), "Error message should appear for empty postal code");
         Assert.assertTrue(stepOnePage.getErrorMessage().contains("Postal Code is required"));
     }
+
     @Test(
             testName = "TC_E2E_005",
             description = "TC_E2E_005 - Verify cancellation flows from Checkout Step One (returns to Cart with item preserved) and Checkout Step Two (returns to Inventory)"
@@ -263,6 +266,7 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertEquals(inventoryPage.getCartBadgeCount(), "1",
                 "Item should remain preserved in cart badge after overview cancellation");
     }
+
     @Test(
             testName = "TC_E2E_006",
             description = "TC_E2E_006 - Verify problem_user defect behavior: broken product images and unfillable Last Name field triggering validation error"
@@ -292,7 +296,7 @@ public class TC_EndtoEnd extends BaseTest {
 
         // 5. Click 'Continue' and handle the known defect:
         // On problem_user, the Last Name field cannot be updated, causing the page to fail validation
-        stepOnePage.clickContinue();
+        stepOnePage.clickContinueExpectingFailure();
 
         // Validate that the system rejects the submission with the Last Name error
         Assert.assertTrue(stepOnePage.isErrorMessageDisplayed(),
@@ -304,6 +308,7 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-one.html"),
                 "User should remain on checkout-step-one page due to validation halt");
     }
+
     @Test(
             testName = "TC_E2E_007",
             description = "TC_E2E_007 - Verify session termination on logout, browser back-button denial, and direct URL routing security"

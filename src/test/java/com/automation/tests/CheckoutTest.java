@@ -46,7 +46,7 @@ public class CheckoutTest extends BaseTest {
         stepOne.enterFirstName("John")
                 .enterLastName("Doe");
 
-        stepOne.clickContinue();
+        stepOne.clickContinueExpectingFailure();
 
         Assert.assertTrue(stepOne.isErrorMessageDisplayed(), "Error message should be visible");
         Assert.assertTrue(stepOne.getErrorMessage().contains("Postal Code is required"),

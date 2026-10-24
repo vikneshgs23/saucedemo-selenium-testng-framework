@@ -23,24 +23,24 @@ public class CheckoutStepOnePage {
         this.waitUtils = new WaitUtils(driver);
     }
 
+    private void safeType(By locator, String value) {
+        WebElement element = waitUtils.waitForVisibility(locator);
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        element.sendKeys(value);
+    }
+
     public CheckoutStepOnePage enterFirstName(String firstName) {
-        WebElement element = waitUtils.waitForVisibility(firstNameInput);
-        element.clear();
-        element.sendKeys(firstName);
+        safeType(firstNameInput, firstName);
         return this;
     }
 
     public CheckoutStepOnePage enterLastName(String lastName) {
-        WebElement element = waitUtils.waitForVisibility(lastNameInput);
-        element.clear();
-        element.sendKeys(lastName);
+        safeType(lastNameInput, lastName);
         return this;
     }
 
     public CheckoutStepOnePage enterPostalCode(String postalCode) {
-        WebElement element = waitUtils.waitForVisibility(postalCodeInput);
-        element.clear();
-        element.sendKeys(postalCode);
+        safeType(postalCodeInput, postalCode);
         return this;
     }
 
@@ -51,9 +51,33 @@ public class CheckoutStepOnePage {
         return this;
     }
 
+    /**
+     * Clicks continue and waits for the transition to Step Two.
+     * Use this ONLY when valid customer info is submitted (Happy path / E2E_001).
+     */
     public CheckoutStepTwoPage clickContinue() {
-        waitUtils.waitForClickable(continueButton).click();
+        clickContinueButtonOnly();
+        waitUtils.waitForUrlContains("checkout-step-two.html");
         return new CheckoutStepTwoPage(driver);
+    }
+
+    /**
+     * Clicks continue WITHOUT waiting for URL transition.
+     * Use this for negative validation tests (missing fields, problem_user) where
+     * the browser is expected to stay on Step One to show error messages.
+     */
+    public CheckoutStepOnePage clickContinueExpectingFailure() {
+        clickContinueButtonOnly();
+        return this;
+    }
+
+    private void clickContinueButtonOnly() {
+        WebElement continueBtn = waitUtils.waitForClickable(continueButton);
+        try {
+            continueBtn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", continueBtn);
+        }
     }
 
     public CartPage clickCancel() {
@@ -72,6 +96,7 @@ public class CheckoutStepOnePage {
             return false;
         }
     }
+
     public CheckoutStepOnePage clearFirstName() {
         WebElement element = waitUtils.waitForVisibility(firstNameInput);
         element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
@@ -89,6 +114,7 @@ public class CheckoutStepOnePage {
         element.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         return this;
     }
+
     public CheckoutStepOnePage dismissErrorMessageIfPresent() {
         try {
             driver.findElement(errorCloseButton).click();
@@ -97,6 +123,7 @@ public class CheckoutStepOnePage {
         }
         return this;
     }
+
     public String getPageTitle() {
         waitUtils.waitForUrlContains("checkout-step-one.html");
         return waitUtils.getText(pageTitle);
