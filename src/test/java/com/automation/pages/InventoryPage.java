@@ -79,6 +79,7 @@ public class InventoryPage {
         }
         waitUtils.waitForUrlContains("cart.html");
         return new CartPage(driver);
+
     }
     public boolean isAddToCartButtonDisplayed(String itemName) {
         By buttonLocator = By.id("add-to-cart-" + itemName.toLowerCase().replace(" ", "-"));
