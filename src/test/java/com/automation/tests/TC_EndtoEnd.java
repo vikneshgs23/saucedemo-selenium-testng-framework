@@ -353,4 +353,36 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/inventory.html' when you are logged in."),
                 "Expected route authorization error banner when deep-linking without active session");
     }
+    @Test(
+            testName = "TC_E2E_008",
+            description = "TC_E2E_008 - Verify checkout behavior when attempting to checkout with an empty cart"
+    )
+    public void TC_E2E_008_verifyEmptyCartCheckoutBehavior() {
+        // Step 1: Log in with valid credentials
+        LoginPage loginPage = new LoginPage(getDriver());
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+
+        // Step 2: Ensure the cart is empty (badge is not displayed)
+        Assert.assertFalse(inventoryPage.isCartBadgeDisplayed(),
+                "Cart badge should not be displayed when cart is empty");
+
+        // Step 3: Navigate to the Cart page
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+        Assert.assertEquals(cartPage.getCartItemCount(), 0, "Cart item count should be 0");
+
+        // Step 4: Click 'Checkout' on an empty cart
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+
+        // Verification: Documenting application behavior
+        // Note: SauceDemo contains a known UX gap where it permits navigating to Checkout Step One even with 0 items
+        Assert.assertEquals(stepOnePage.getPageTitle(), "Checkout: Your Information",
+                "Application navigated to Checkout Step One despite cart being empty (known behavior/defect)");
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-one.html"),
+                "URL should contain checkout-step-one.html");
+    }
 }
