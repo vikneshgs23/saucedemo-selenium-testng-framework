@@ -385,4 +385,33 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-one.html"),
                 "URL should contain checkout-step-one.html");
     }
+    @Test(
+            testName = "TC_E2E_009",
+            description = "TC_E2E_009 - Verify unauthorized direct URL navigation to protected pages redirects to login with an error banner"
+    )
+    public void TC_E2E_009_verifyUnauthenticatedDirectRouteAccess() {
+        LoginPage loginPage = new LoginPage(getDriver());
+
+        // 1. Attempt direct navigation to protected inventory page
+        getDriver().get("https://www.saucedemo.com/inventory.html");
+
+        // Verify redirection to login page and access denied error message
+        Assert.assertTrue(loginPage.isAtLoginPage(),
+                "Direct navigation to /inventory.html should redirect unauthenticated user to login");
+        Assert.assertFalse(getDriver().getCurrentUrl().contains("inventory.html"),
+                "URL should not remain on inventory.html");
+        Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/inventory.html' when you are logged in."),
+                "Error banner mismatch for /inventory.html access restriction");
+
+        // 2. Attempt direct navigation to protected checkout-step-one page
+        getDriver().get("https://www.saucedemo.com/checkout-step-one.html");
+
+        // Verify redirection to login page and access denied error message for checkout
+        Assert.assertTrue(loginPage.isAtLoginPage(),
+                "Direct navigation to /checkout-step-one.html should redirect unauthenticated user to login");
+        Assert.assertFalse(getDriver().getCurrentUrl().contains("checkout-step-one.html"),
+                "URL should not remain on checkout-step-one.html");
+        Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/checkout-step-one.html' when you are logged in."),
+                "Error banner mismatch for /checkout-step-one.html access restriction");
+    }
 }
