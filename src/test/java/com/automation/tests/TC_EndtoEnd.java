@@ -414,4 +414,45 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(loginPage.getErrorMessage().contains("You can only access '/checkout-step-one.html' when you are logged in."),
                 "Error banner mismatch for /checkout-step-one.html access restriction");
     }
+    @Test(
+            testName = "TC_E2E_010",
+            description = "TC_E2E_010 - Verify form boundary handling with 250+ characters, special symbols, and alphanumeric postal codes"
+    )
+    public void TC_E2E_010_verifyBoundaryAndSpecialCharacterInputsAtCheckout() {
+        // Step 1: Log in and add an item to the cart
+        LoginPage loginPage = new LoginPage(getDriver());
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+        inventoryPage.addItemToCart(BACKPACK);
+
+        // Step 2: Navigate to Cart and proceed to Checkout Step One
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+        Assert.assertEquals(stepOnePage.getPageTitle(), "Checkout: Your Information",
+                "Failed to reach Checkout Step One");
+
+        // Step 3: Prepare boundary test data
+        String longFirstName = "A".repeat(260); // 260 characters buffer overflow / boundary test
+        String specialCharLastName = "<script>alert('xss')</script>!@#$%^&*()_+"; // Special characters & XSS payload
+        String alphanumericPostalCode = "EC1A 1BB"; // Standard UK alphanumeric postal code format
+
+        stepOnePage.enterFirstName(longFirstName)
+                .enterLastName(specialCharLastName)
+                .enterPostalCode(alphanumericPostalCode);
+
+        // Step 4: Click 'Continue'
+        // SauceDemo permits non-empty inputs and transitions cleanly to step two
+        CheckoutStepTwoPage stepTwoPage = stepOnePage.clickContinue();
+
+        // Verification: Ensure the application didn't crash and rendered Checkout Step Two
+        Assert.assertEquals(stepTwoPage.getPageTitle(), "Checkout: Overview",
+                "Application should handle boundary inputs gracefully and navigate to Overview");
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-two.html"),
+                "URL should point to checkout-step-two.html");
+    }
 }
