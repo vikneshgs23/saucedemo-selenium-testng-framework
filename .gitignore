@@ -4,14 +4,16 @@ target/
 !**/src/test/**/target/
 .kotlin
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
-*.iml
-*.ipr
+### IntelliJ (ignore the whole folder) ###
+.idea/
+
+### Test output and reports ###
+test-output/
+screenshots/
+*.log
+
+### Windows ###
+Thumbs.db
 
 ### Eclipse ###
 .apt_generated
