@@ -455,4 +455,55 @@ public class TC_EndtoEnd extends BaseTest {
         Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-two.html"),
                 "URL should point to checkout-step-two.html");
     }
+    @Test(
+            testName = "TC_E2E_011",
+            description = "TC_E2E_011 - Verify application handles XSS script tag injections gracefully without executing script alerts"
+    )
+    public void TC_E2E_011_verifyScriptInjectionSanitizationAtCheckout() {
+        // Step 1: Log in and add an item to the cart
+        LoginPage loginPage = new LoginPage(getDriver());
+        InventoryPage inventoryPage = loginPage.login(
+                ConfigReader.getStandardUsername(),
+                ConfigReader.getPassword());
+
+        Assert.assertEquals(inventoryPage.getPageTitle(), "Products", "Failed to reach Inventory page");
+        inventoryPage.addItemToCart(BACKPACK);
+
+        // Step 2: Navigate to Cart and proceed to Checkout Step One
+        CartPage cartPage = inventoryPage.clickCart();
+        Assert.assertEquals(cartPage.getPageTitle(), "Your Cart", "Failed to reach Cart page");
+
+        CheckoutStepOnePage stepOnePage = cartPage.clickCheckout();
+        Assert.assertEquals(stepOnePage.getPageTitle(), "Checkout: Your Information",
+                "Failed to reach Checkout Step One");
+
+        // Step 3: Input standard script injection payloads
+        String xssScriptPayload = "<script>alert('XSS-Injection')</script>";
+        String xssImgPayload = "<img src=x onerror=alert('XSS')>";
+
+        stepOnePage.enterFirstName(xssScriptPayload)
+                .enterLastName("Tester")
+                .enterPostalCode(xssImgPayload);
+
+        // Step 4: Click 'Continue'
+        // If an unhandled script alert fires, Selenium will throw UnhandledAlertException
+        CheckoutStepTwoPage stepTwoPage = stepOnePage.clickContinue();
+
+        // Step 5: Verification
+        // 1. Assert that no alert blocked the transition and URL is on step two
+        Assert.assertEquals(stepTwoPage.getPageTitle(), "Checkout: Overview",
+                "Application failed to reach Overview page after handling script tag inputs");
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("checkout-step-two.html"),
+                "URL should point to checkout-step-two.html");
+
+        // 2. Explicitly verify no modal alert is active in the browser
+        boolean isAlertPresent = false;
+        try {
+            getDriver().switchTo().alert();
+            isAlertPresent = true;
+        } catch (org.openqa.selenium.NoAlertPresentException ignored) {
+            // Expected: no modal was spawned by the injected script tags
+        }
+        Assert.assertFalse(isAlertPresent, "Security failure: Injected script tag spawned a browser alert dialog");
+    }
 }
