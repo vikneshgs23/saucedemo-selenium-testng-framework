@@ -48,10 +48,11 @@ public class TestListener implements ITestListener {
             WebDriver driver = BaseTest.getDriver();
 
             if (driver != null) {
-                String screenshotPath = ScreenshotUtil.captureScreenshot(driver, methodName);
-                if (screenshotPath != null) {
+                // Embeds the screenshot in the report as Base64 so it works on GitHub Pages too
+                String base64Screenshot = ScreenshotUtil.captureBase64(driver, methodName);
+                if (base64Screenshot != null) {
                     ExtentReportManager.getTest().fail("Failure Screenshot",
-                            MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build());
+                            MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
                 }
             } else {
                 System.err.println("WebDriver was null for thread; cannot capture screenshot for " + methodName);

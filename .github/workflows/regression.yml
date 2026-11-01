@@ -7,10 +7,14 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test-execution:
     name: Run Headless UI Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -26,12 +30,19 @@ jobs:
       - name: Execute Tests via Maven
         run: mvn clean test -Dheadless=true -Dbrowser=chrome
 
+      - name: Prepare report for GitHub Pages
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p site
+          cp test-output/ExtentReport.html site/index.html
+
       - name: Upload Extent Report
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: extent-test-report
           path: test-output/ExtentReport.html
+          retention-days: 30
 
       - name: Upload Failure Screenshots
         if: failure()
@@ -39,3 +50,24 @@ jobs:
         with:
           name: failure-screenshots
           path: target/screenshots/
+
+      - name: Upload report for GitHub Pages
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  deploy-report:
+    needs: test-execution
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.test-execution.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
