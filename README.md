@@ -1,6 +1,6 @@
 # SauceDemo E2E Test Automation Framework
 
-[![SauceDemo Test Automation CI](https://github.com/vikneshgs23/saucedemo-selenium-testng-framework/actions/workflows/regression.yml/badge.svg)](https://github.com/vikneshgs23/saucedemo-selenium-testng-framework/actions/workflows/regression.yml)
+[![Live Report](https://img.shields.io/badge/Extent%20Report-Live-blue)](https://vikneshgs23.github.io/saucedemo-selenium-testng-framework/)
 
 A thread-safe UI test automation framework for [SauceDemo (Swag Labs)](https://www.saucedemo.com/), built with **Java**, **Selenium WebDriver**, **TestNG** and **ExtentReports 5**. Tests run in parallel locally and in a **GitHub Actions** pipeline.
 
@@ -116,6 +116,11 @@ Browser options set in `BaseTest` let the tests run in a headless Linux environm
 - `--no-sandbox`
 - `--disable-dev-shm-usage` (avoids shared-memory problems in Linux containers)
 - `--disable-features=PasswordLeakDetection` and incognito mode (avoids popups that block automation)
+---
+
+### 📊 Live Test Report
+The latest Extent report from CI is published automatically on every push to `main`:
+👉 **[View the live report](https://vikneshgs23.github.io/saucedemo-selenium-testng-framework/)**
 
 ---
 
