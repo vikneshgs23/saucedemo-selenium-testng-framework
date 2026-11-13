@@ -4,6 +4,7 @@
 
     <listeners>
         <listener class-name="com.automation.utils.TestListener"/>
+        <listener class-name="com.automation.utils.RetryListener"/>
     </listeners>
 
     <test name="End-to-End Tests">

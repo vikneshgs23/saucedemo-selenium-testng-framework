@@ -63,9 +63,16 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        System.out.println("SKIPPED: " + result.getMethod().getMethodName());
+        String methodName = result.getMethod().getMethodName();
         if (ExtentReportManager.getTest() != null) {
-            ExtentReportManager.getTest().log(Status.SKIP, "Test skipped: " + result.getThrowable());
+            if (result.wasRetried()) {
+                System.out.println("RETRYING: " + methodName);
+                ExtentReportManager.getTest().log(Status.WARNING,
+                        "Initial attempt failed; retrying test. Reason: " + result.getThrowable().getMessage());
+            } else {
+                System.out.println("SKIPPED: " + methodName);
+                ExtentReportManager.getTest().log(Status.SKIP, "Test skipped: " + result.getThrowable());
+            }
         }
         ExtentReportManager.unloadTest();
     }
